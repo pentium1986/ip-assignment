@@ -221,14 +221,11 @@ public class RequestSaver {
 		// this should never run in parallel anyway
 		synchronized(instance) {
 			try {
-				System.out.println("a");
 				logger = Logger.getLogger(this.getClass().getCanonicalName());
 				ngen = new NdlGenerator(logger);
-				System.out.println("ab");
 				reservation = ngen.declareReservation();
 				Individual term = ngen.declareTerm();
 				
-				System.out.println("b");
 				// not an immediate reservation? declare term beginning
 				if (RequestState.getInstance().getTerm().getStart() != null) {
 					Individual tStart = ngen.declareTermBeginning(RequestState.getInstance().getTerm().getStart());
@@ -244,7 +241,6 @@ public class RequestSaver {
 				// openflow
 				ngen.addOpenFlowCapable(reservation, RequestState.getInstance().getOfNeededVersion());
 				
-				System.out.println("c");
 				// add openflow details
 				if (RequestState.getInstance().getOfNeededVersion() != null) {
 					Individual ofSliceI = ngen.declareOfSlice("of-slice");
@@ -257,7 +253,7 @@ public class RequestSaver {
 				
 				// decide whether we have a global image
 				boolean globalImage = false, globalDomain = false;
-				System.out.println("d");
+				
 				// is image specified in the reservation?
 				if (RequestState.getInstance().getVMImageInReservation() != null) {
 					// there is a global image (maybe)
@@ -277,7 +273,7 @@ public class RequestSaver {
 					Individual domI = ngen.declareDomain(domainMap.get(RequestState.getInstance().getDomainInReservation()));
 					ngen.addDomainToIndividual(domI, reservation);
 				}
-				System.out.println("e");
+				
 				// shove invidividual nodes onto the reservation
 				for (OrcaNode n: RequestState.getInstance().getGraph().getVertices()) {
 					Individual ni;
@@ -319,7 +315,7 @@ public class RequestSaver {
 						Individual domI = ngen.declareDomain(domainMap.get(n.getDomain()));
 						ngen.addNodeToDomain(domI, ni);
 					}
-					System.out.println("f");
+
 					// node type
 					if ((n.getNodeType() != null) && (nodeTypes.get(n.getNodeType()) != null)) {
 						Pair<String> nt = nodeTypes.get(n.getNodeType());
@@ -354,7 +350,7 @@ public class RequestSaver {
 						}
 					}
 				}
-				System.out.println("g");
+
 				if (RequestState.getInstance().getGraph().getEdgeCount() == 0) {
 					// a bunch of disconnected nodes, no IP addresses 
 					
@@ -377,7 +373,7 @@ public class RequestSaver {
 						processNodeAndLink(pn.getSecond(), e, ei);
 					}
 				}
-				System.out.println("h");
+
 				// save the contents
 				res = getFormattedOutput(ngen, outputFormat);
 
@@ -396,10 +392,8 @@ public class RequestSaver {
 	public boolean saveGraph(File f, SparseMultigraph<OrcaNode, OrcaLink> g) {
 		assert(f != null);
 		String ndl = convertGraphToNdl(g);
-		if (ndl == null){
-			System.out.println("NULL");
+		if (ndl == null)
 			return false;
-		}
 		try{
 			FileOutputStream fsw = new FileOutputStream(f);
 			OutputStreamWriter out = new OutputStreamWriter(fsw, "UTF-8");
