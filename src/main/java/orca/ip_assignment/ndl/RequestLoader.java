@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-//import orca.ip_assignment.GUI;
 import orca.ip_assignment.RequestState;
 import orca.ip_assignment.OrcaImage;
 import orca.ip_assignment.OrcaLink;
@@ -59,8 +58,6 @@ public class RequestLoader implements INdlRequestModelListener {
 			bin.close();
 			
 			NdlRequestParser nrp = new NdlRequestParser(sb.toString(), this);
-//			GUI.logger().debug("Parsing request");
-			System.out.println("parsing request");
 			nrp.processRequest();
 			
 		} catch (Exception e) {
@@ -85,7 +82,7 @@ public class RequestLoader implements INdlRequestModelListener {
 
 	public void ndlReservation(Resource i, final OntModel m) {
 		System.out.println("ndlReservation");
-//		GUI.logger().debug("Reservation: " + i);
+
 		if (i != null) {
 			reservationDomain = RequestSaver.reverseLookupDomain(NdlCommons.getDomain(i));
 			RequestState.getInstance().setOFVersion(NdlCommons.getOpenFlowVersion(i));
@@ -126,7 +123,7 @@ public class RequestLoader implements INdlRequestModelListener {
 
 	public void ndlNode(Resource ce, OntModel om, Resource ceClass, List<Resource> interfaces) {
 		System.out.println("ndlNode");
-		//		GUI.logger().debug("Node: " + ce);
+
 		if (ce == null)
 			return;
 		OrcaNode newNode;
@@ -203,8 +200,7 @@ public class RequestLoader implements INdlRequestModelListener {
 	public void ndlNetworkConnection(Resource l, OntModel om, 
 			long bandwidth, long latency, List<Resource> interfaces) {
 		System.out.println("ndlNetworkConnection");
-//		GUI.logger().debug("NetworkConnection: " + l);
-		// System.out.println("Found connection " + l + " connecting " + interfaces + " with bandwidth " + bandwidth);
+
 		if (l == null)
 			return;
 		
@@ -248,7 +244,7 @@ public class RequestLoader implements INdlRequestModelListener {
 
 	public void ndlInterface(Resource intf, OntModel om, Resource conn, Resource node, String ip, String mask) {
 		System.out.println("ndlInterface");
-//		GUI.logger().debug("Interface: " + intf);
+
 		if (intf == null)
 			return;
 		OrcaNode on = null;
@@ -277,7 +273,7 @@ public class RequestLoader implements INdlRequestModelListener {
 	
 	public void ndlSlice(Resource sl, OntModel m) {
 		System.out.println("ndlSlice");
-//		GUI.logger().debug("Slice: " + sl);
+
 		// check that this is an OpenFlow slice and get its details
 		if (sl.hasProperty(NdlCommons.RDF_TYPE, NdlCommons.ofSliceClass)) {
 			Resource ofCtrl = NdlCommons.getOfCtrl(sl);
@@ -305,7 +301,7 @@ public class RequestLoader implements INdlRequestModelListener {
 	
 	public void ndlParseComplete() {
 		System.out.println("ndlParseComplete");
-//		GUI.logger().debug("Done parsing.");
+
 		// set term etc
 		RequestState.getInstance().setTerm(term);
 		RequestState.getInstance().setDomainInReservation(reservationDomain);

@@ -91,81 +91,21 @@ public class OrcaNode {
 		return name;
 	}
 	
-	// Icon transformer for GUI
-/*	public static class OrcaNodeIconTransformer implements Transformer<OrcaNode, Icon> {
-
-		public Icon transform(OrcaNode node) {
-			return node.icon;
-		}
-	}*/
-	
-	// Icon shape transformer for GUI (to make sure icon clickable shape roughly matches the icon)
-/*	public static class OrcaNodeIconShapeTransformer implements Transformer<OrcaNode, Shape> {
-		private static final int ICON_HEIGHT = 30;
-		private static final int ICON_WIDTH = 50;
-
-				//		        private final Shape[] styles = {
-//		            new Rectangle(-20, -10, 40, 20),
-//		            new Ellipse2D.Double(-25, -10, 50, 20),
-//		            new Arc2D.Double(-30, -15, 60, 30, 30, 30,
-//		                Arc2D.PIE) };
-		        public Shape transform(OrcaNode i) {
-		            return new Ellipse2D.Double(-ICON_WIDTH/2, -ICON_HEIGHT/2, ICON_WIDTH, ICON_HEIGHT);
-		        }
-		    }*/
-
-	
-	// check mark for selected nodes
-	// boosted from JUNG Lens example
- /*   public static class PickWithIconListener implements ItemListener {
-        OrcaNodeIconTransformer imager;
-        Icon checked;
-        
-        public PickWithIconListener(OrcaNodeIconTransformer imager) {
-            this.imager = imager;
-            checked = new Checkmark(Color.red);
-        }
-
-        public void itemStateChanged(ItemEvent e) {
-            Icon icon = imager.transform((OrcaNode)e.getItem());
-            if(icon != null && icon instanceof LayeredIcon) {
-                if(e.getStateChange() == ItemEvent.SELECTED) {
-                    ((LayeredIcon)icon).add(checked);
-                } else {
-                    ((LayeredIcon)icon).remove(checked);
-                }
-            }
-        }
-    }*/
-	
 	public OrcaNode(String name) {
 		this.name = name;
 		this.addresses = new HashMap<OrcaLink, Pair<String>>();
-//		this.icon = new LayeredIcon(new ImageIcon(GUIRequestState.class.getResource(OrcaNodeEnum.CE.getIconName())).getImage());
 	}
 
 	// inherit some properties from parent
 	public OrcaNode(String name, OrcaNode parent) {
 		this.name = name;
 		this.addresses = new HashMap<OrcaLink, Pair<String>>();
-//		this.icon = new LayeredIcon(new ImageIcon(GUIRequestState.class.getResource(OrcaNodeEnum.CE.getIconName())).getImage());
 		this.domain = parent.getDomain();
 		this.image = parent.getImage();
 		this.nodeType = parent.getNodeType();
 		this.dependencies = parent.getDependencies();
 		this.state = parent.state;
 	}
-	
-	/**
-	 * only subclasses can set the icon
-	 * @param name
-	 * @param icon
-	 */
-/*	protected OrcaNode(String name, LayeredIcon icon) {
-		this.name = name;
-		this.addresses = new HashMap<OrcaLink, Pair<String>>();
-//		this.icon = icon;
-	}*/
 	
 	public String getName() {
 		return name;
@@ -361,7 +301,7 @@ public class OrcaNode {
 	 * @author ibaldin
 	 *
 	 */
-    public static class OrcaNodeFactory implements Factory<OrcaNode> {
+ /*   public static class OrcaNodeFactory implements Factory<OrcaNode> {
         private INodeCreator inc = null;
         
         public OrcaNodeFactory(INodeCreator i) {
@@ -371,13 +311,13 @@ public class OrcaNode {
         /**
          * Create a node or a cloud based on some setting
          */
-        public OrcaNode create() {
+  /*      public OrcaNode create() {
         	if (inc == null)
         		return null;
         	synchronized(inc) {
         		return inc.create();
         	}
         }       
-    }
+    }*/
 
 }

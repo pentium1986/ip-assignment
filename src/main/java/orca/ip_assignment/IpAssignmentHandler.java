@@ -22,9 +22,11 @@ public class IpAssignmentHandler {
 	private File inFile;
 	private File outFile;
 	private int laneNo;
-	private final int MAX_LANE_NUM = 4;
+	private static final int MAX_LANE_NUM = 4;
+	private static final int MAX_DOMAIN_NUM = 8;
+	private static final int MAX_IP_CHUNK_NUM = 20;
+	private static final int MAX_CHUNK_LEN = 255;
 	boolean[] laneTags = {true, true, true, true};
-//	private RequestLoader requestLoader;
 	private static IpAssignmentHandler instance = null;
 	
 	private static final ArrayList<String> domains;
@@ -40,32 +42,30 @@ public class IpAssignmentHandler {
 		domains.add("NERSC (not a GENI resource)");
 	}
 	
-	private static final Vector<Vector<Vector<IpRange>>> ipMatrix;
+	private static final IpRange[][][] ipMatrix;
 	static{
-		ipMatrix = new Vector<Vector<Vector<IpRange>>>();
+		ipMatrix = new IpRange[MAX_DOMAIN_NUM][MAX_LANE_NUM][MAX_IP_CHUNK_NUM];
 		int start = 167772161;
 		int nm = 24;
-		for (int i = 0; i < 8; i++) {
-			Vector<Vector<IpRange>> row = new Vector<Vector<IpRange>>();
-			for (int j = 0; j < 4; j++) {
-				Vector<IpRange> column = new Vector<IpRange>();
-				for (int k = 0; k < 20; k++) {
-					IpRange cell = new IpRange(start,nm,10);
+		for (int i = 0; i < MAX_DOMAIN_NUM; i++) {
+			for (int j = 0; j < MAX_LANE_NUM; j++) {
+				for (int k = 0; k < MAX_IP_CHUNK_NUM; k++) {
+//					System.out.println("site " + i + " lane " + j + " chunk " + k + ":" + 
+//							IpRange.convertAddrToStr(start));
+					IpRange chunk = new IpRange(start, nm, MAX_CHUNK_LEN);
 					start = start + 0x00000100;
-					column.add(cell);
+					ipMatrix[i][j][k] = chunk;
 				}
-				row.add(column);
 			}
-			ipMatrix.add(row);
 		}
 	}
 	
 	private static boolean[][][] ipMatrixTags;
 	static{
-		ipMatrixTags = new boolean[8][4][20];
-		for (int i = 0; i < 8; i++) {
-			for (int j = 0; j < 4; j++) {
-				for (int k = 0; k < 20; k++) {
+		ipMatrixTags = new boolean[MAX_DOMAIN_NUM][MAX_LANE_NUM][MAX_IP_CHUNK_NUM];
+		for (int i = 0; i < MAX_DOMAIN_NUM; i++) {
+			for (int j = 0; j < MAX_LANE_NUM; j++) {
+				for (int k = 0; k < MAX_IP_CHUNK_NUM; k++) {
 					ipMatrixTags[i][j][k] = true;
 				}
 			}
@@ -112,8 +112,6 @@ public class IpAssignmentHandler {
 	
 		laneNo = getAvailableLane();
 		
-		System.out.println("hey");
-		
 		for (OrcaLink e : RequestState.getInstance().getGraph().getEdges()) {
 			Pair<OrcaNode> pn = RequestState.getInstance().getGraph().getEndpoints(e);
 			IpRange assignedRange = getIpRange(pn.getFirst().getDomain(), laneNo);
@@ -135,16 +133,25 @@ public class IpAssignmentHandler {
 								secondStartAddress, 
 								Integer.toString(assignedRange.getNetmask()));
 		}
+		
+		//internal VLAN	
+		for (OrcaNode n : RequestState.getInstance().getGraph().getVertices()) {
+			if (n instanceof OrcaNodeGroup && ((OrcaNodeGroup) n).getInternalVlan()) {
+				IpRange assignedRange = getIpRange(n.getDomain(), laneNo);
+				((OrcaNodeGroup) n).setInternalIp(
+						IpRange.convertAddrToStr(assignedRange.getStartAddress()), 
+						Integer.toString(assignedRange.getNetmask()));
+			}
+		}
 	}
 	
 	private IpRange getIpRange(String domain, int lane) {
-		int index = domains.indexOf(domain);
-		Vector<IpRange> pool = ipMatrix.get(index).get(lane);
+		int domainIndex = domains.indexOf(domain);
 		IpRange res = null;
-		for (int i = 0; i < 20; i++) {
-			if(ipMatrixTags[index][lane][i]) {
-				ipMatrixTags[index][lane][i] = false;
-				res = pool.get(i);
+		for (int i = 0; i < MAX_IP_CHUNK_NUM; i++) {
+			if(ipMatrixTags[domainIndex][lane][i]) {
+				ipMatrixTags[domainIndex][lane][i] = false;
+				res = ipMatrix[domainIndex][lane][i];
 				break;
 			}
 		}
