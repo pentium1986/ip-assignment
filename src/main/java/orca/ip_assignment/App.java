@@ -19,7 +19,8 @@ public class App
     	File outfile2 = new File("/home/kexu/workspace/ip-assignment/testoutput2.ndl");
 //    	RL.loadGraph(infile);
 //    	RequestSaver.getInstance().saveGraph(outfile, RequestState.getInstance().g);
-    	IpAssignmentHandler.getInstance().processIpAssignment(infile, outfile);
-    	IpAssignmentHandler.getInstance().processIpAssignment(infile2, outfile2);
+    	IpAssignmentHandler.getInstance().processIpAssignment(infile, outfile, "test1");
+    	IpAssignmentHandler.getInstance().freeIpAddresses("test1");
+    	IpAssignmentHandler.getInstance().processIpAssignment(infile2, outfile2, "test2");
     }
 }

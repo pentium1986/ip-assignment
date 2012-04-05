@@ -21,6 +21,7 @@ import orca.ip_assignment.ndl.RequestSaver;
 public class IpAssignmentHandler {
 	private File inFile;
 	private File outFile;
+	private String currentId;
 	private int laneNo;
 	private static final int MAX_LANE_NUM = 4;
 	private static final int MAX_DOMAIN_NUM = 8;
@@ -72,6 +73,11 @@ public class IpAssignmentHandler {
 		}
 	}
 	
+	private static Map<String, Vector<int[]>> assignedIpMap;
+	static{
+		assignedIpMap = new HashMap<String, Vector<int[]>>();
+	}
+	
 	private IpAssignmentHandler() {
 		
 	}
@@ -82,10 +88,11 @@ public class IpAssignmentHandler {
 		return instance;
 	}
 	
-	public boolean processIpAssignment(File in, File out) {
+	public boolean processIpAssignment(File in, File out, String id) {
     	RequestLoader RL = new RequestLoader();
     	inFile = in;
     	outFile = out;
+    	currentId = id;
     	RL.loadGraph(inFile);
     	traverseGraph(RequestState.getInstance().getGraph());
     	RequestSaver.getInstance().saveGraph(outFile, RequestState.getInstance().getGraph());
@@ -151,10 +158,35 @@ public class IpAssignmentHandler {
 		for (int i = 0; i < MAX_IP_CHUNK_NUM; i++) {
 			if(ipMatrixTags[domainIndex][lane][i]) {
 				ipMatrixTags[domainIndex][lane][i] = false;
+				int[] indices = {domainIndex, lane, i};
+				if (assignedIpMap.containsKey(currentId)) {
+					Vector<int[]> assignedIpRanges = assignedIpMap.get(currentId);
+					assignedIpRanges.add(indices);
+					assignedIpMap.put(currentId, assignedIpRanges);
+				}
+				else {
+					Vector<int[]> assignedIpRanges = new Vector<int[]>();
+					assignedIpRanges.add(indices);
+					assignedIpMap.put(currentId, assignedIpRanges);
+				}
 				res = ipMatrix[domainIndex][lane][i];
 				break;
 			}
 		}
 		return res;
+	}
+	
+	public boolean freeIpAddresses (String id) {
+		if (assignedIpMap.containsKey(id)) {
+			Vector<int[]> assignedIpRanges = assignedIpMap.get(id);
+			for (int[] indices : assignedIpRanges) {
+				ipMatrixTags[indices[0]][indices[1]][indices[2]] = true;
+				laneTags[indices[1]] = true;
+			}
+			assignedIpRanges.clear();
+			assignedIpMap.remove(id);
+			return true;
+		}
+		return false;
 	}
 }
